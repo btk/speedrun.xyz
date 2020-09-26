@@ -4,11 +4,8 @@ import React from "react"
 
 const Header = ({ siteTitle }) => (
   <header>
-    <div className="logo">
-      <Link to={"/"}>
-        <img src={require("../images/do_logo.svg")} alt="dream oriented logo" style={{width: 300}}/>
-      </Link>
-      <img src={require("../images/dots.svg")}  style={{width: 300}}/>
+    <div className="header">
+      <Link to={`/`}><div className="logo">speedrun.xyz</div></Link>
     </div>
   </header>
 )
