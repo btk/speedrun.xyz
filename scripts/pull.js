@@ -47,7 +47,7 @@ let pull = async (url) => {
     console.log("DONE");
     game.runs = runs;
     let data = JSON.stringify(game);
-    fs.writeFileSync("src/runs/"+game.abbreviation+"_"+game.category.id+'.json', data);
+    fs.writeFileSync("runs/"+game.abbreviation+"_"+game.category.id+'.json', data);
   }
 }
 
