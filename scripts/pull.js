@@ -43,29 +43,33 @@ if(process.argv[2]){
       for (var i = 0; i < res.data.length; i++) {
         let item = res.data[i];
         let player = null;
-        try{
-          player = await fetch(item.players[0].uri).then(res => res.json());
-        }catch (err) {
-          console.log("error, trying again");
-          player = await fetch(item.players[0].uri).then(res => res.json());
-        }
+        if(item.players[0]){
+          
+          try{
+            player = await fetch(item.players[0].uri).then(res => res.json());
+          }catch (err) {
+            console.log("error, trying again");
+            player = await fetch(item.players[0].uri).then(res => res.json());
+          }
 
-        if(player.data && item.date){
-          let name = player.data.name ? player.data.name : player.data.names.international;
-          let run = {
-            date: item.date,
-            time: item.times.primary_t,
-            player: name,
-            country: player.data.location ? player.data.location.country.code : ``,
-            style: player.data["name-style"]
-          };
-          if(uniquify([run, ...runs], run.player)){
-            runs.push(run);
-            console.log(run.time, run.player);
-          }else{
-            console.log("not relevant", run.player);
+          if(player.data && item.date){
+            let name = player.data.name ? player.data.name : player.data.names.international;
+            let run = {
+              date: item.date,
+              time: item.times.primary_t,
+              player: name,
+              country: player.data.location ? player.data.location.country.code : ``,
+              style: player.data["name-style"]
+            };
+            if(uniquify([run, ...runs], run.player)){
+              runs.push(run);
+              console.log(run.time, run.player);
+            }else{
+              console.log("not relevant", run.player);
+            }
           }
         }
+
       }
     }
     if(res.pagination.links.filter(l => l.rel == "next").length == 1){
