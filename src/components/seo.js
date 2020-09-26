@@ -27,6 +27,9 @@ function SEO({ description, lang, meta, title }) {
 
   const metaDescription = description || site.siteMetadata.description
 
+  if(!title.includes("speedrun.xyz")){
+    title = title + " - speedrun.xyz";
+  }
   return (
     <Helmet
       htmlAttributes={{

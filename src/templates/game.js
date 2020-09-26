@@ -46,7 +46,7 @@ export default function Template({data}) {
 
   return (
     <Layout>
-      <SEO title={`${game.name}`} description={`Project description for`}/>
+      <SEO title={`${game.name}`} description={`This animated graph visualizes timeline of the verified runs for ${game.name} in ${game.category.name} category that have been in the best 20 at the time of their submission.`}/>
       <div className="Game">
         <div style={{width: 170}}>
           <img src={game.cover} style={{width:128,  height:180}}/>

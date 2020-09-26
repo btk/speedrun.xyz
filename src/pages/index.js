@@ -11,7 +11,7 @@ export default function IndexPage({data}) {
 
   return (
     <Layout>
-      <SEO title="speedrun.xyz - Live timeline of record speedruns for games" description="We are a group of people focused on Creating, designing, making and sustaining digital products that matter!"/>
+      <SEO title="speedrun.xyz - Live timeline of record speedruns for games" description="Visualized timeline of speedrun records for popular games and run categories"/>
       <p style={{fontSize: 23}}>
       Visualized timeline of speedrun records<br/>
       for popular games and run categories</p>
@@ -32,7 +32,6 @@ export default function IndexPage({data}) {
           )
         })}
       </div>
-
 
       <p>The game you want is not here? Let us know and we will add it.</p>
       <a href="mailto:info@dreamoriented.org"><span>REQUEST A GAME</span></a>
