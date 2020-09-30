@@ -131,6 +131,10 @@ body {
   overflow: hidden;
 }
 
+.sideStats {
+  height: 200px;
+}
+
 .runItem {
   display: flex;
   flex-direction: row;

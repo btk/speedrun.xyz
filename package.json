@@ -44,7 +44,7 @@
     "develop": "gatsby develop",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "push": "gatsby build && aws s3 rm s3://speedrun.xyz --recursive && aws s3 cp public s3://speedrun.xyz --recursive",
-    "start": "yarn req && npm run develop",
+    "start": "yarn req && yarn develop",
     "serve": "gatsby serve",
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\"",
     "req": "pre-require runs/ runs.js",

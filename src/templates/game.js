@@ -13,6 +13,8 @@ export default function Template({data}) {
   let runRaw = JSON.parse(game.runs);
   const height = 30;
   const [runs, setRuns] = useState([]);
+  const [runners, setRunners] = useState([]);
+  const [holdDays, setHoldDays] = useState([]);
   const [date, setDate] = useState(0);
 
   useEffect(() => {
@@ -23,18 +25,49 @@ export default function Template({data}) {
     setDate(runRaw[0].date);
     let index = 1;
     let interval = setInterval(() => {
-      setRuns(uniquify(runRaw.slice(0, index).sort((a, b) => (a.time > b.time) ? 1 : -1)));
-      setDate(runRaw[index-1].date);
+      let runsByDate = runRaw.slice(0, index).sort((a, b) => (a.time > b.time) ? 1 : -1);
+      let newDate = runRaw[index-1].date;
+      setDate(newDate);
+      setRuns(uniquify(runsByDate));
+      setRunners(runnerCount(runsByDate));
+      setHoldDays(runnerDays(runsByDate, holdDays, newDate));
       index++;
       if(index > runRaw.length){
         clearInterval(interval);
         console.log("DONE!");
+
+        const dt = new Date();
+        let dateToday = dateFormat(dt, "yyyy-mm-dd");
+        setDate(dateToday);
+        setHoldDays(runnerDays(runsByDate, holdDays, dateToday));
       }
     }, 1000);
   }
 
   const transitions = useTransition(
     runs.map((data, i) => ({ ...data, y: i * height })),
+    d => d.player,
+    {
+      from: { position: "absolute", opacity: 0 },
+      leave: { height: 0, opacity: 0 },
+      enter: ({ y }) => ({ y, opacity: 1 }),
+      update: ({ y }) => ({ y })
+    }
+  );
+
+  const transitionsHoldDays = useTransition(
+    holdDays.map((data, i) => ({ ...data, y: i * height })),
+    d => d.player,
+    {
+      from: { position: "absolute", opacity: 0 },
+      leave: { height: 0, opacity: 0 },
+      enter: ({ y }) => ({ y, opacity: 1 }),
+      update: ({ y }) => ({ y })
+    }
+  );
+
+  const transitionsRunCount = useTransition(
+    runners.map((data, i) => ({ ...data, y: i * height })),
     d => d.player,
     {
       from: { position: "absolute", opacity: 0 },
@@ -95,8 +128,41 @@ export default function Template({data}) {
 
           <div className="rightPanel">
             <h2>Days to Hold Record</h2>
-
+            <div className="sideStats">
+              {transitionsHoldDays.map(({ item, props: { y, ...rest }, key }, index) => {
+                let flagUrl = parse(item.country.split("/")[0] ? flag(item.country.split("/")[0]) : "🏁")[0].url;
+                return (
+                  <animated.div key={key} className="runItem" style={{
+                      transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
+                      ...rest
+                    }}>
+                      <div className="playerName">
+                        <img src={flagUrl} style={{height: 20, display: "inline"}}/>
+                        <span>{item.player}</span>
+                      </div>
+                      <div className="runTime">{item.daysHold} Days</div>
+                    </animated.div>
+                  );
+                })}
+            </div>
             <h2>Most Active Runners</h2>
+            <div className="sideStats">
+              {transitionsRunCount.map(({ item, props: { y, ...rest }, key }, index) => {
+                let flagUrl = parse(item.country.split("/")[0] ? flag(item.country.split("/")[0]) : "🏁")[0].url;
+                return (
+                  <animated.div key={key} className="runItem" style={{
+                      transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
+                      ...rest
+                    }}>
+                      <div className="playerName">
+                        <img src={flagUrl} style={{height: 20, display: "inline"}}/>
+                        <span>{item.player}</span>
+                      </div>
+                      <div className="runTime">{item.timesRun} Runs</div>
+                    </animated.div>
+                  );
+                })}
+            </div>
           </div>
         </div>
     </Layout>
@@ -146,6 +212,53 @@ function uniquify(runs){
   return uniqueRuns;
 }
 
+function runnerCount(runs){
+  let mostRunners = [];
+  runs.forEach((item, i) => {
+    if(mostRunners.filter(r => r.player == item.player).length == 0){
+      item.timesRun = 1;
+      mostRunners.push(item);
+    }else{
+      mostRunners.map(r => {
+        if(r.player == item.player){
+          r.timesRun += 1;
+        }
+        return r;
+      })
+    }
+  });
+
+  mostRunners = mostRunners.sort((a, b) => (a.timesRun > b.timesRun) ? -1 : 1).slice(0, 7).map((data, i) => ({ ...data, y: i * 30 }));
+
+  return mostRunners;
+}
+
+let prevDate = null;
+
+function runnerDays(runs, hd, currentDate){
+  let mostDays = hd;
+  let bestRunner = runs[0];
+
+  if(mostDays.filter(r => r.player == bestRunner.player).length == 0){
+    bestRunner.daysHold = 0;
+    mostDays.push(bestRunner);
+  }else{
+    mostDays.map(r => {
+      if(r.player == bestRunner.player){
+        if(prevDate){
+          r.daysHold += dayDifference(prevDate, currentDate);
+        }
+      }
+      return r;
+    })
+  }
+
+  mostDays = mostDays.sort((a, b) => (a.daysHold > b.daysHold) ? -1 : 1).slice(0, 7).map((data, i) => ({ ...data, y: i * 30 }));
+  prevDate = currentDate;
+
+  return mostDays;
+}
+
 function timeBeautifier(totalSeconds){
   let hours = Math.floor(totalSeconds / 3600);
   totalSeconds %= 3600;
@@ -159,4 +272,12 @@ function timeBeautifier(totalSeconds){
 function dateBeautifier(date){
   const db = new Date(date);
   return dateFormat(db, "d mmmm yyyy");
+}
+
+function dayDifference(d1, d2){
+  const date1 = new Date(d1);
+  const date2 = new Date(d2);
+  const diffTime = Math.abs(date2 - date1);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
 }
