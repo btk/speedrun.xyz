@@ -16,32 +16,74 @@ export default function Template({data}) {
   const [runners, setRunners] = useState([]);
   const [holdDays, setHoldDays] = useState([]);
   const [date, setDate] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [progressIndex, setProgressIndex] = useState(1);
+  const [playing, setPlaying] = useState(true);
+  const [ended, setEnded] = useState(false);
+  const [int, setInt] = useState(null);
 
   useEffect(() => {
-    restartTicker();
+    restartTicker(1000);
   }, []);
 
-  let restartTicker = () => {
-    setDate(runRaw[0].date);
-    let index = 1;
+  let toggle = () => {
+    if(playing){
+      stopTicker();
+    }else{
+      restartTicker(1000);
+    }
+    setPlaying(!playing);
+  }
+
+  let replay = () => {
+    setEnded(false);
+    setProgressIndex(1);
+    setTimeout(() => {
+      restartTicker(1000, true);
+      setPlaying(true);
+    }, 100);
+  }
+
+  let changeSpeed = (tickerSpeed) => {
+    stopTicker();
+    setTimeout(() => {
+      restartTicker(tickerSpeed);
+    }, 100);
+  }
+
+  let stopTicker = () => {
+    clearInterval(int);
+  }
+
+
+  let restartTicker = (tickerTime, restart) => {
+    let index = restart ? 1 : progressIndex;
+    setDate(runRaw[index].date);
     let interval = setInterval(() => {
       let runsByDate = runRaw.slice(0, index).sort((a, b) => (a.time > b.time) ? 1 : -1);
-      let newDate = runRaw[index-1].date;
-      setDate(newDate);
-      setRuns(uniquify(runsByDate));
-      setRunners(runnerCount(runsByDate));
-      setHoldDays(runnerDays(runsByDate, holdDays, newDate));
-      index++;
-      if(index > runRaw.length){
-        clearInterval(interval);
-        console.log("DONE!");
+      if(runRaw[index-1]){
+        let newDate = runRaw[index-1].date;
+        setDate(newDate);
+        setProgress(Math.ceil(index/runRaw.length * 100));
+        setRuns(uniquify(runsByDate));
+        setRunners(runnerCount(runsByDate));
+        setHoldDays(runnerDays(runsByDate, holdDays, newDate));
+        index++;
+        setProgressIndex(index);
+        if(index > runRaw.length){
+          stopTicker();
+          console.log("DONE!");
+          setPlaying(false);
+          setEnded(true);
 
-        const dt = new Date();
-        let dateToday = dateFormat(dt, "yyyy-mm-dd");
-        setDate(dateToday);
-        setHoldDays(runnerDays(runsByDate, holdDays, dateToday));
+          const dt = new Date();
+          let dateToday = dateFormat(dt, "yyyy-mm-dd");
+          setDate(dateToday);
+          setHoldDays(runnerDays(runsByDate, holdDays, dateToday));
+        }
       }
-    }, 1000);
+    }, tickerTime);
+    setInt(interval);
   }
 
   const transitions = useTransition(
@@ -91,6 +133,15 @@ export default function Template({data}) {
           <p className="runAmount">Number of Record Runs: {runRaw.length}</p>
           <p>This animated graph visualizes timeline of the verified runs for {game.name} in {game.category.name} category that have been in the best 20 at the time of their submission.</p>
         </div>
+      </div>
+      <div className="controller">
+        <div className="buttons">
+          <div className={playing ? "button ms-Icon ms-Icon--Pause" : "button ms-Icon ms-Icon--Play"} onClick={ended ? () => replay() : () => toggle()}></div>
+          <div className="button ms-Icon ms-Icon--FastForwardOneX" onClick={() => changeSpeed(1000)}></div>
+          <div className="button ms-Icon ms-Icon--FastForwardFourX" onClick={() => changeSpeed(500)}></div>
+          <div className="button ms-Icon ms-Icon--FastForwardEightX" onClick={() => changeSpeed(250)}></div>
+        </div>
+        <div className="progress"><div className="progressDone" style={{width: `${progress}%`}}></div></div>
       </div>
       <div className="timeline">
         <div className="leftPanel">

@@ -1,3 +1,29 @@
+@font-face {
+  font-family: 'FabricMDL2Icons';
+  src: url('../font/fabric.woff') format('woff');
+}
+
+.ms-Icon {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-family: 'FabricMDL2Icons';
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+}
+
+.ms-Icon--AustralianRules:before { content: "\EE70"; }
+.ms-Icon--AuthenticatorApp:before { content: "\F6B1"; }
+.ms-Icon--AutoEnhanceOff:before { content: "\E78E"; }
+.ms-Icon--FastForwardEightX:before { content: "\E443"; }
+.ms-Icon--FastForwardFourX:before { content: "\E442"; }
+.ms-Icon--FastForwardOneX:before { content: "\E43F"; }
+.ms-Icon--Pause:before { content: "\E769"; }
+.ms-Icon--Play:before { content: "\E768"; }
+.ms-Icon--PlayResume:before { content: "\F2C6"; }
+
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -124,6 +150,50 @@ body {
   margin-top: 5px;
 }
 
+
+.controller {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttons {
+  width: 180px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  margin-right: 10px;
+}
+
+.button {
+  background: #1f1f1f;
+  padding: 10px;
+  font-size: 17px;
+  border-radius: 100%;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #222;
+}
+
+.progress {
+  height: 12px;
+  flex: 1;
+  background: #1f1f1f;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.progressDone {
+  height: 12px;
+  background: #09b876;
+  border-radius: 6px;
+  transition: 200ms all;
+}
+
 .runs {
   display: flex;
   flex-direction: column;
@@ -204,6 +274,10 @@ body {
   }
   .GameObject img {
     height: auto;
+  }
+
+  .timeline {
+    flex-direction: column;
   }
 }
 
